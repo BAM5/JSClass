@@ -5,7 +5,7 @@ ClassConstructor is a way of organizing the data, methods, and getters and sette
 ## Code Example
 
 ### Basic Usage
-```
+```javascript
 var ExampleClass = Class(
 	// Constructor Function
 	function ExampleClass(someArgs){
@@ -58,7 +58,7 @@ example.gettersetter = "Cool Stuff";
 ```
 
 ### Inheritance
-```
+```javascript
 var Bar = ExampleClass.extend( // The .extend is an alias function that invokes the Class function with ExampleClass as the last argument. Eg Class(constructor, constructorProps, protoProps, ExampleClass)
 	// Constructor
 	function Bar(someArgs){
@@ -91,14 +91,14 @@ Clone and use the function in your web projects
 
 ## API Reference
 
-### `Class(constructor, static, instance, inheritsFrom)`
+##### `Class(constructor, static, instance, inheritsFrom)`
 A quick, neat, and organized way to create a "class" in javascript.
 
-`constructor` - A constructor function. The prototype.constructor property is automatically set to this function.
-`static` - An object that contains name:value pairs or name:[property-descriptor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description) pairs, or a combination of both. This argument can also be a function that returns this object. If this arguments evaluates as false then no action is taken.
-`instance` - A value the same as the `static` argument. These properties get applied to the prototype.
-`inheritsFrom` - A constructor function to inherit from. If provided the prototype will extend this constructors prototype. A hidden property named `super` will also be available to child instances that point to the `inheritsFrom`'s prototype.
-
+`constructor` - A constructor function. The prototype.constructor property is automatically set to this function.  
+`static` - An object that contains name:value pairs or name:[property-descriptor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description) pairs, or a combination of both. This argument can also be a function that returns this object. If this arguments evaluates as false then no action is taken.  
+`instance` - A value the same as the `static` argument. These properties get applied to the prototype.  
+`inheritsFrom` - A constructor function to inherit from. If provided the prototype will extend this constructors prototype. A hidden property named `super` will also be available to child instances that point to the `inheritsFrom`'s prototype.  
+  
 Returns - A constructor function that will create new objects.
 
 ## Contributors
