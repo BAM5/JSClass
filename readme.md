@@ -124,5 +124,5 @@ Please feel free to use github's bug tracker if anything is not working properly
 
 ## License
 
-I really need to look into licenses...
+I really need to look into licenses...  
 Uhh, feel free to use this code and modify it however you want, you just can't sell it for profit. Crediting me is appreciated.
