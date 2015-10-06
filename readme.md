@@ -4,7 +4,22 @@ ClassConstructor is a way of organizing the data, methods, and getters and sette
 
 ## Code Example
 
-### Basic Usage
+#### Inclusion
+jsclass.js can be included into projects in 3 ways. Through a `module.exports` variable, through the `window` variable, and through an angular constant `$Class` provided through the `"jsClass"` module.
+
+```javascript
+window.Class(...);
+
+var Class = require("jsclass.js");
+Class(...);
+
+angular.module("example", ["jsClass"])
+.factory("$SomeClass", ["$Class", function($Class){
+	return $Class(...);
+}]);
+```
+
+#### Basic Usage
 ```javascript
 var ExampleClass = Class(
 	// Constructor Function
@@ -57,7 +72,7 @@ example.someFunc();
 example.gettersetter = "Cool Stuff";
 ```
 
-### Inheritance
+#### Inheritance
 ```javascript
 var Bar = ExampleClass.extend( // The .extend is an alias function that invokes the Class function with ExampleClass as the last argument. Eg Class(constructor, constructorProps, protoProps, ExampleClass)
 	// Constructor
