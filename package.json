@@ -1,0 +1,26 @@
+{
+  "name": "jsclass",
+  "version": "1.0.0",
+  "description": "jsclass is a function for semantically organizing the data, methods, and getters and setters for classes and doing prototype inheritance quickly and easily in javascript.",
+  "main": "jsclass.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BAM5/JSClass.git"
+  },
+  "keywords": [
+    "jsclass",
+    "class",
+    "constructor",
+    "inheritance",
+    "javascript"
+  ],
+  "author": "Brian Mandara",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BAM5/JSClass/issues"
+  },
+  "homepage": "https://github.com/BAM5/JSClass"
+}

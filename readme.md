@@ -1,6 +1,6 @@
 ## Synopsis
 
-ClassConstructor is a way of organizing the data, methods, and getters and setters for classes and doing prototype inheritance quickly and easily in javascript.
+jsclass is a function for semantically organizing the data, methods, and getters and setters for classes and doing prototype inheritance quickly and easily in javascript.
 
 ## Code Example
 
