@@ -176,10 +176,10 @@
 	 * 
 	 * @see [MDN Property Descriptors](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description)
 	 * 
-	 * @param   {Function}           constructor  - The constructor function for your new class.
-	 * @param   {?(Object|Function)} static       - An object with a list of properties as keys, and values as the value for the property. Values can also be property descriptor objects. Check the See link for more details. This can also be a function that returns an object with this format. These properties will be added to the Constructor function.
-	 * @param   {?(Object|Function)} instance     - An object with a list of properties as keys, and values as the value for the property. Values can also be property descriptor objects. Check the See link for more details. This can also be a function that returns an object with this format. These properties will be added to the Constructor function's prototype object.
-	 * @param   {?Function}          inheritsFrom - A constructor function that this class should inherit from.
+	 * @param   {Function}           constructor    - The constructor function for your new class.
+	 * @param   {?(Object|Function)} static         - An object with a list of properties as keys, and values as the value for the property. Values can also be property descriptor objects. Check the See link for more details. This can also be a function that returns an object with this format. These properties will be added to the Constructor function.
+	 * @param   {?(Object|Function)} instance       - An object with a list of properties as keys, and values as the value for the property. Values can also be property descriptor objects. Check the See link for more details. This can also be a function that returns an object with this format. These properties will be added to the Constructor function's prototype object.
+	 * @param   {Function}           [inheritsFrom] - A constructor function that this class should inherit from.
 	 *                                          
 	 * @returns {Function}           Your new class's constructor function.
 	 */
@@ -237,6 +237,14 @@
 
 		return constructor;
 	}
+	
+	/**
+	 * This property decides whether or not to hide (enumerable: false) properties that begin with an underscore from enumeration.
+	 * 
+	 * @type {Boolean}
+	 * @default
+	 */
+	Class.HideUnderscores = true;
 
 	/**
 	 * This method will convert an object with a key:value, or a mix between key:value and key:property-descriptor format to a key:property-descriptor format.
@@ -250,7 +258,7 @@
 			if(!isDescriptor(object[key])){
 				object[key] = {
 					configurable:	true,
-					enumerable:		true,
+					enumerable:		!(key[0] === "_" && Class.HideUnderscores),
 					writable:		true,
 
 					value: object[key]
