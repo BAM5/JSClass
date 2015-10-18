@@ -296,7 +296,7 @@
 		return ("value" in object || "get" in object || "set" in object);
 	}
 	
-	if(module) module.exports = Class;
-	else if(window) window.Class = Class;
-	if(angular) angular.module("jsClass", []).constant("$Class", Class);
+	if("module" in this) module.exports = Class;
+	else if("window" in this) window.Class = Class;
+	if("angular" in this) angular.module("jsClass", []).constant("$Class", Class);
 })();
