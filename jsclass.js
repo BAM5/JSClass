@@ -1,242 +1,274 @@
-(function(){
-	/**
-	 * This is a convenience function for creating javascript "class"es.
-	 * 
-	 * The main reason for this function's existance is to semantically and easily create
-	 * javascript constructor functions that will also configure prototype and constructor
-	 * properties while also allowing for easy prototype inheritance.
-	 * 
-	 * This is also an easy way to add getter and setter properties to the prototype and
-	 * constructor. This is possible because the static and instance parameters look for
-	 * property descriptors allowing you to easily make getter, setter, and readonly values.
-	 * Any property descriptor is supported.  
-	 * [See the MDN page on Object.defineProperty for more details on property descriptors.]
-	 * (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description)
-	 * 
-	 * @example <caption>Inclusion</caption>
-	 * // To use in a browser environment, just include the file in a script tag and access through window.Class
-	 * window.Class(...);
-	 * // Or just
-	 * Class(...)
-	 * 
-	 * // To use in a node.js environment, just require the module in
-	 * var Class = require("jsclass")
-	 * Class(...)
-	 * 
-	 * // To use in a angular environment just include the module "jsClass" and use the injector parameter "$Class".
-	 * // $Class is defined as a constant, so it is available in the configuration stage.
-	 * angular.module("exampleScript", ["jsClass"])
-	 * .config(["$Class", function($Class){
-	 *     $Class(...)
-	 * });
-	 * 
-	 * @example <caption>Creating a class</caption>
-	 * // Once you have access to your class function you can create a class as follows
-	 * var Foo = Class(
-	 *     // This is your constructor function
-	 *     function Foo(param1){
-	 *         // Do stuff
-	 *         this.someVar = param1;
-	 *     },
-	 *     
-	 *     // These are your static properties.
-	 *     // Note: These properties can contain property descriptors such as getters and setters, as well as read only values.
-	 *     {
-	 *         // Example of a regular variable
-	 *         StaticVariable: "Foo",
-	 *         
-	 *         // Example of a static method
-	 *         StaticFunction: function(){
-	 *             // Do stuff
-	 *         }
-	 *         
-	 *         // Example of a read only variable
-	 *         StaticConstant: {
-	 *             // We use a property descriptor object to accomplish this.
-	 *             configurable: true,
-	 *             enumerable:   true,
-	 *             
-	 *             writable: false
-	 *             value:    "FooBar"
-	 *         },
-	 *         
-	 *         // Example of a static getter setter
-	 *         StaticGetterSetter: {
-	 *             // Once again we use a property descriptor object to accomplish this.
-	 *             configurable: true,
-	 *             enumerable:   true,
-	 *             
-	 *             get: function(){
-	 *                 return this.StaticVariable;
-	 *             },
-	 *             
-	 *             set: function(newValue){
-	 *                 console.log("Assigning new value to Foo.StaticVariable: ", this.StaticVariable, " => ", newValue);
-	 *                 this.StaticVariable = newValue;
-	 *             }
-	 *         },
-	 *         
-	 *         // Example of a factory function
-	 *         StaticFactory: function(param1){
-	 *             return new this(param1 + "Factory");
-	 *         }
-	 *     },
-	 *     
-	 *     // These are your instance properties (Foo.prototype properties)
-	 *     // Note: These properties can contain property descriptors such as getters and setters, as well as read only values.
-	 *     {
-	 *         // Example of a variable
-	 *         someVar: "foo",
-	 *         
-	 *         // Example of a method
-	 *         someFunc: function(param){
-	 *             // Do some stuff
-	 *             return this.someVar;
-	 *         },
-	 *         
-	 *         // Example of readonly value
-	 *         someReadonlyValue: {
-	 *             // We use a property descriptor object to accomplish this.
-	 *             configurable: true,
-	 *             enumerable:   true,
-	 *             
-	 *             writable: false
-	 *             value:    "fooBar"
-	 *         },
-	 *         
-	 *         // Example of a getter setter
-	 *         getterSetter: {
-	 *             // Once again we use a property descriptor object to accomplish this.
-	 *             configurable: true,
-	 *             enumerable:   true,
-	 *             
-	 *             get: function(){
-	 *                 return this.someVar;
-	 *             },
-	 *             
-	 *             set: function(newValue){
-	 *                 console.log("Assigning new value to Foo#someVar: ", this.someVar, " => ", newValue);
-	 *                 this.someVar = newValue;
-	 *             }
-	 *         }
-	 *     }
-	 * );
-	 * 
-	 * var foo = new Foo("FooBarBaz");
-	 * console.log(foo.someVar);           // "FooBarBaz"
-	 * console.log(foo.someFunc());        // "FooBarBaz"
-	 * console.log(foo.getterSetter);      // "FooBarBaz"
-	 * console.log(foo.someReadonlyValue); // "fooBar"
-	 * 
-	 * foo.someReadonlyValue = "fooBarBaz";
-	 * console.log(foo.someReadonlyValue); // "fooBar"
-	 * 
-	 * @example <caption>Inheritance and overriding</caption>
-	 * // There are 2 ways to easily have a class inherit from another.
-	 * 
-	 * // The first and recommended way is to call the .extend function that gets added automatically by any class defined by the Class function.
-	 * var Bar = Foo.extend(
-	 *     function Bar(param1, param2){
-	 *         param1 = param1 + param2;
-	 *         // In order to get all the properties that are added by the super constructor you must call the constructor. Any prototype proprties are automatically extended. However you arn't required to do this.
-	 *         // this.super is a convenience function that is automatically added that points to the constructor of the parent class. In this case, this.super points to Foo.
-	 *         this.super.call(this, param1);
-	 *         // For those not familiar with javascript inheritance, you must use the .call (or .apply) method of the super function with the first parameter equal to this in order for the super function to modify this instance.
-	 *     },
-	 *     null, // Bar has no static properties.
-	 *     {
-	 *         // Overriding functions
-	 *         someFunc: function(param){
-	 *             param = param + param + param;
-	 *             
-	 *             // If you want to call the parent's class version of this method then you must access it through this.super.prototype
-	 *             return this.super.prototype.someFunc.call(this, param);
-	 *             // Once again we need to call the .call or .apply method of the function in order to set the "this" variable so the function will modify this instance.
-	 *         }
-	 *     }
-	 * );
-	 * 
-	 * console.log(Bar.StaticVariable); // null - this is because StaticVariable is on the Foo class. Static properties arn't inherited. Only instance properties are.
-	 * 
-	 * var bar = new Bar("FooBaz", "Bar");
-	 * console.log(bar.someVar);           // "FooBazBar"
-	 * console.log(bar.someFunc());        // "FooBazBar"
-	 * console.log(bar.getterSetter);      // "FooBazBar"
-	 * console.log(bar.someReadonlyValue); // "fooBar"
-	 * 
-	 * 
-	 * 
-	 * // The second method is to use the 4th parameter of the Class function. This is useful for extending javascript classes that arn't created with the Class function.
-	 * var Baz = Class(
-	 *     function Baz(...){...},
-	 *     ...,
-	 *     ...,
-	 *     Array
-	 * );
-	 * 
-	 * @see [MDN Property Descriptors](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty#Description)
-	 * 
-	 * @param   {Function}           constructor    - The constructor function for your new class.
-	 * @param   {?(Object|Function)} static         - An object with a list of properties as keys, and values as the value for the property. Values can also be property descriptor objects. Check the See link for more details. This can also be a function that returns an object with this format. These properties will be added to the Constructor function.
-	 * @param   {?(Object|Function)} instance       - An object with a list of properties as keys, and values as the value for the property. Values can also be property descriptor objects. Check the See link for more details. This can also be a function that returns an object with this format. These properties will be added to the Constructor function's prototype object.
-	 * @param   {Function}           [inheritsFrom] - A constructor function that this class should inherit from.
-	 *                                          
-	 * @returns {Function}           Your new class's constructor function.
-	 */
-	function Class(constructor, static, instance, inheritsFrom){
-		if(inheritsFrom && typeof inheritsFrom !== "function")
-			throw new Error("Argument Error: inheritsFrom parameter must be a constructor function.");
-		if(static && typeof static === "function") static = static(constructor);
-		if(instance && typeof instance === "function") instance = instance(constructor);
+(function(global){
+	"use strict";
+	
+	/*
+	Class2("com.bam5.CoolStuffMcGee extends com.bam5.neat", {...});
+	Class2("extends com.bam5.neat" {...});
+	Class2(com.bam5.neat, {...});
+	Class2({...});
+	Class2("com.bam5.coolStuffMcGee", com.bam5.neat, {...});
+	Class2("com.bam5.CoolStuffMcGee", "com.bam5.neat", {
+		// everything in the object before the constructor function is static
+		StaticVar: "This is static",
+		StaticFunc: function(){return "Static!"},
+		
+		// Constructor
+		CoolStuffMcGee: function(){
+			// This is the constructor function
+		},
+		
+		// The constructor can also just be called "constructor"
+		constructor: function(){
+			
+		},
+		
+		// Instance properties
+		isOpen: {
+			get: function(){return this._open;},
+			set: function(newVal){this._open = newVal)}
+		},
+		
+		open: function(){},
+		
+		// Non Enumerable Props (anything beginning with an underscore)
+		_open: false
+	});
+	*/
+	
+	var argErr = "Argument Error: The arguments are not what was expected";
+	
+	var ol = {
+		"object":						"classObj",
+		"string, object":				"defineStr, classObj",
+		"constructor, object":			"extendInfo.extendObj, classObj",
+		"string, string, object":		"classInfo.fqn, extendInfo.fqn, classObj",
+		"string, constructor, object":	"defineStr, extendInfo.extendObj, classObj",
+	};
+	
+	var Class2 = function(){
+		var args = overload(ol, arguments);
+		
+		if(args.defineStr){
+			var fqnInfo = getFQNInfo(args.defineStr);
+			if(fqnInfo) args.classInfo = getClassInfo(fqnInfo);
 
-		var prototype = {};
-
-		// Extend inheritsFrom
-		if(inheritsFrom){
-			prototype = Object.create(inheritsFrom.prototype);
-			Object.defineProperty(prototype, "super", {
+			if(!args.extendInfo){
+				fqnInfo = getExtendFQNInfo(args.defineStr);
+				if(fqnInfo) args.extendInfo = getClassInfo(fqnInfo);
+			}
+			if(args.extendInfo && args.extendInfo.fqn && !args.extendInfo.fqnInfo)
+				args.extendInfo = getClassInfo(getFQNInfo(args.extendInfo.fqn));
+			
+			if(args.extendInfo && !args.extendInfo.extendObj)
+				args.extendInfo.extendObj = getObj(args.extendInfo.fqnInfo);
+		}
+		
+		var promise = {
+			finished:	false,
+			state:		null,
+			cbArgs:		null,
+			success:	null,
+			failure:	null,
+			then: function(success, failure){ this.success = success; this.failure = failure; if(this.finished) this.call(); },
+			call: function(){ this.finished = true; this[this.state] && this[this.state].apply(global, this.cbArgs); }
+		};
+		
+		var createClass = function(){
+			if(args.extendInfo && !args.extendInfo.extendObj){
+				args.extendInfo.extendObj = getObj(args.extendInfo.fqnInfo);
+				if(!args.extendInfo.extendObj) return false;
+			}
+			
+			var classObj = args.classObj;
+			var isStatic = true;
+			var statics = {};
+			var instance = {};
+			var hidden = {};
+			var constructor = null;
+			
+			for(var prop in classObj){
+				if(prop === "constructor" || prop === args.classInfo.className || (prop === "instance")){
+					isStatic = false;
+					constructor = classObj[args.classInfo.className || "constructor"] || null;
+					continue;
+				}
+				
+				if(isStatic) statics[prop] = classObj[prop];
+				else if(prop[0] === "_" && Class2.HideUnderscored) instance[prop] = hidden[prop] = classObj[prop];
+				else instance[prop] = classObj[prop];
+			}
+			
+			var ClassConstructor;
+			
+			var evalFunc = "function(){\n\
+					// We do this because if we don't the property will be visible when set on the instance.\n\
+					Object.defineProperties(this, hidden);\n\
+					return (constructor && constructor.apply(this, arguments)) || this;\n\
+				}";
+			
+			if(args.classInfo){
+				if(getObj(args.classInfo.fqnInfo)) throw new Error(args.classInfo.fqn + " is already defined");
+				// Make the class name in console the same as the class's fqn instead of being "ClassConstructor"
+				setObj(args.classInfo.fqnInfo, null)
+				eval(args.classInfo.fqn+ " = "+evalFunc+";\n\
+				ClassConstructor = "+args.classInfo.fqn+";");
+			} else{
+				var AnonymousConstructor = eval("("+evalFunc+")");
+				ClassConstructor = AnonymousConstructor;
+			}
+			
+			// Set up inheritance
+			var proto = {};
+			
+			if(args.extendInfo){
+				proto = Object.create(args.extendInfo.extendObj);
+				
+				Object.defineProperty(proto, "super", {
+					configurable:	false,
+					enumerable:		false,
+					
+					writable:		false,
+					value:			args.extendInfo.extendObj
+				});
+			}
+			
+			Object.defineProperty(proto, "constructor", {
 				configurable:	false,
 				enumerable:		false,
+				
 				writable:		false,
-
-				value: inheritsFrom.prototype
+				value:			ClassConstructor
 			});
-		}
-
-		if(static){
-			toDescriptors(static);
-			Object.defineProperties(constructor, static);
-		}
-
-		if(instance){
-			toDescriptors(instance);
-			Object.defineProperties(prototype, instance);
-		}
-
-		Object.defineProperty(prototype, "constructor", {
-			configurable:	false,
-			enumerable:		false,
-			writable:		false,
-
-			value: constructor
-		});
-		Object.defineProperty(constructor, "prototype", {
-			value: prototype
-		});
-
-		if(!("extend" in constructor))
-			Object.defineProperty(constructor, "extend", {
-				configurable:	true,
-				enumerable:		false,
-				writable:		false,
-
-				value: function(childConstructor, static, instance){
-					return Class(childConstructor, static, instance, constructor);
-				}
-			});
-
-		return constructor;
+			
+			statics.prototype = {
+				value:		proto
+			};
+			
+			Object.defineProperties(ClassConstructor,	toDescriptors(statics));
+			Object.defineProperties(proto,				toDescriptors(instance));
+			Object.defineProperties(proto,				toDescriptors(hidden));
+			
+			if(args.classInfo)
+				Class2.queue.updateRequired(args.classInfo.fqn, ClassConstructor);
+			
+			promise.finished = true;
+			promise.state = "success";
+			promise.cbArgs = [ClassConstructor];
+			promise.call();
+			
+			return ClassConstructor;
+		};
+		
+		if(args.extendInfo && args.extendInfo.fqn && !args.extendInfo.extendObj){
+			Class2.queue.add(args.extendInfo.fqn, createClass);
+			return promise;
+		} else
+			return createClass();
 	}
+		
+	Object.defineProperty(Class2, "queue", {
+		configurable:	false,
+		enumerable:		false,
+
+		writable:	false,
+		value:		{}
+	});
+	Class2.queue.add = function(requiredFQN, createClass){
+		if(!(requiredFQN in this)) this[requiredFQN] = [];
+		this[requiredFQN].push(createClass);
+	};
+	Class2.queue.updateRequired = function(fqn){
+		if(this[fqn])
+			this[fqn].each(function(el, i, arr){
+				el();
+			});
+	};
+	
+	function getObj(fqn, root){
+		fqn = Array.isArray(fqn) ? fqn : getFQNInfo(fqn);
+		var obj = root || global;
+		for(var i = 0; i<fqn.length && obj; i++) obj = obj[fqn[i]];
+		return i === fqn.length?obj:undefined;
+	}
+	
+	function setObj(fqn, value, root){
+		fqn = Array.isArray(fqn) ? fqn : getFQNInfo(fqn);
+		var obj = root || global;
+		for(var i=0, len=fqn.length; i<len-1; i++)
+			obj = obj[fqn[i]] = obj[fqn[i]] || {};
+		obj[fqn[fqn.length-1]] = value;
+	}
+	
+	var csv = /([a-zA-Z_](?:\w|\.)*)\s*,?\s*/g;
+	var is = {
+		"string":		function(check){ return "string" === typeof(check)},
+		"number":		function(check){ return "number" === typeof(check)},
+		"object":		function(check){ return "object" === typeof(check)},
+		"boolean":		function(check){ return "boolean" === typeof(check)},
+		"function":		function(check){ return "function" === typeof(check)},
+		"array":		function(check){ return Array.isArray(check)},
+		"constructor":	function(check){ return "function" === typeof(check) && check.prototype.constructor === check},
+	};
+	function overload(signatures, args){
+		var matches, matchNum, correctSig;
+		
+		sigIterate: for(var signature in signatures){
+			matchNum = 0;
+			csv.lastIndex = 0;
+			while((matches = csv.exec(signature)) && matchNum<args.length){
+				if(!is[matches[1]](args[matchNum])) continue sigIterate;
+				matchNum++;
+			}
+			if(matchNum !== args.length || matches) continue sigIterate;
+			correctSig = signature;
+			break;
+		}
+		
+		if(!correctSig) throw new Error("The arguments provided did not match any of the signatures for this function.");
+		
+		if(is["function"](signatures[correctSig]))
+			return signatures[correctSig].apply(this, args);
+		
+		var organized = {}, matchNum = 0;
+		csv.lastIndex = 0;
+		while(matches = csv.exec(signatures[correctSig]))
+			setObj(matches[1].split("."), args[matchNum++], organized);
+		
+		return organized;
+	}
+	
+	Class2.Overload = overload;
+	
+	var isFQN = /^(?:[a-zA-Z_]\w*\.?)+$/;
+	var defineString = /^\s*(?:class\s)?\s*((?:[a-zA-Z_]\w*\.?)+)?(?:\s*(?:extends\s*((?:[a-zA-Z_]\w*\.?)+))?)?\s*$/i;
+	
+	function getClassInfo(fqnInfo){
+		return {
+			fqn:		fqnInfo.join("."),
+			fqnInfo:	fqnInfo,
+			package:	fqnInfo.slice(0, -1).join("."),
+			className:	fqnInfo[fqnInfo.length -1]
+		};
+	}
+	
+	function getFQNInfo(src){
+		if(!isFQN.test(src)){
+			var match = defineString.exec(src);
+			src = match !== null && match[1];
+		}
+		if(src && isFQN.test(src))
+			return src.split(".");
+		return null;
+	}
+	
+	function getExtendFQNInfo(src){
+		var match = defineString.exec(src);
+		src = match !== null && match[2];
+		if(src && isFQN.test(src))
+			return src.split(".");
+		return null;
+	}
+	
 	
 	/**
 	 * This property decides whether or not to hide (enumerable: false) properties that begin with an underscore from enumeration.
@@ -244,7 +276,7 @@
 	 * @type {Boolean}
 	 * @default
 	 */
-	Class.HideUnderscores = true;
+	Class2.HideUnderscored = true;
 
 	/**
 	 * This method will convert an object with a key:value, or a mix between key:value and key:property-descriptor format to a key:property-descriptor format.
@@ -254,16 +286,19 @@
 	 * @param {Object} object - An object to convert.
 	 */
 	function toDescriptors(object){
-		for(var key in object)
+		for(var key in object){
 			if(!isDescriptor(object[key])){
 				object[key] = {
 					configurable:	true,
-					enumerable:		!(key[0] === "_" && Class.HideUnderscores),
+					enumerable:		!(key[0] === "_" && Class2.HideUnderscored),
 					writable:		true,
 
 					value: object[key]
 				};
 			}
+		}
+			console.log(object);
+		return object;
 	}
 
 	var validProps = ["configurable", "enumerable", "writable", "value", "get", "set"];
@@ -296,7 +331,9 @@
 		return ("value" in object || "get" in object || "set" in object);
 	}
 	
-	if("module" in this) module.exports = Class;
-	else if("window" in this) window.Class = Class;
-	if("angular" in this) angular.module("jsClass", []).constant("$Class", Class);
-})();
+	
+	if("module" in global) module.exports = Class2;
+	else if("window" in global) window.Class = Class2;
+	if("angular" in global) angular.module("jsClass", []).constant("$Class", Class);
+	
+})(this);
