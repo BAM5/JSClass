@@ -1,6 +1,6 @@
 {
   "name": "jsclass",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "jsclass is a function for semantically organizing the data, methods, and getters and setters for classes and doing prototype inheritance quickly and easily in javascript.",
   "main": "jsclass.js",
   "scripts": {
