@@ -121,7 +121,7 @@
 			var proto = {};
 			
 			if(args.extendInfo){
-				proto = Object.create(args.extendInfo.extendObj);
+				proto = Object.create(args.extendInfo.extendObj.prototype);
 				
 				Object.defineProperty(proto, "super", {
 					configurable:	false,
