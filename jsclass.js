@@ -89,7 +89,7 @@
 			for(var prop in classObj){
 				if(prop === "constructor" || prop === args.classInfo.className || (prop === "instance")){
 					isStatic = false;
-					constructor = classObj[args.classInfo.className || "constructor"] || null;
+					constructor = classObj[args.classInfo.className] || classObj["constructor"] || null;
 					continue;
 				}
 				
