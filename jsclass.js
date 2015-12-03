@@ -123,12 +123,11 @@
 			if(args.extendInfo){
 				proto = Object.create(args.extendInfo.extendObj.prototype);
 				
-				Object.defineProperty(proto, "super", {
+				if(!proto.super) Object.defineProperty(ClassConstructor, "super", {
 					configurable:	false,
 					enumerable:		false,
 					
-					writable:		false,
-					value:			args.extendInfo.extendObj
+					get: getSuper
 				});
 			}
 			
@@ -183,6 +182,40 @@
 				el();
 			});
 	};
+	
+	function getSuper(){
+		if(getSuper.caller._super) return getSuper.caller._super;
+        
+        var Super;
+        var keys, i, len, descriptor;
+        var proto = this;
+        
+        top: while(proto = Object.getPrototypeOf(proto)){
+            keys = Object.getOwnPropertyNames(proto);
+            i = 0;
+            while(descriptor=Object.getOwnPropertyDescriptor(proto, keys[i++]))
+                if(getSuper.caller === descriptor.value || getSuper.caller === descriptor.get || getSuper.caller === descriptor.set){
+                    Super = Object.getPrototypeOf(proto);
+                    break top;
+                }
+        }
+        
+        // Couldn't find Super
+        if(!Super){
+            if(!proto) throw new Error("Unable to find Super because .super was called outside of a class method.");
+            else throw new Error("Unable to retrieve Super because this class doesn't inherit from another class.");
+        }
+        
+        /* Cache "super"'s value inside the method.
+         * This can cause a bug if the class's method is shared between multiple classes.
+         * function shared(){}
+         * a.shared = shared;
+         * b.shared = shared;
+         */
+        Object.defineProperty(getSuper.caller, "_super", {enumerable: false, value: Super});
+        
+        return Super;
+	}
 	
 	function getObj(fqn, root){
 		fqn = Array.isArray(fqn) ? fqn : getFQNInfo(fqn);
